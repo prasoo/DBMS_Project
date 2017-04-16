@@ -1,0 +1,277 @@
+
+CREATE SCHEMA BANK_ACCOUNTING_TO_ATM;
+SET SEARCH_PATH TO BANK_ACCOUNTING_TO_ATM;
+
+create table Bank(
+    
+	Bankname varchar(50),
+   	 Bank_id varchar (50) primary key 
+
+);
+create table Customer(
+	DOB date,
+        Aadhar_no Bigint primary key NOT NULL,
+	fname varchar(10),
+	lname varchar(10),
+	mname varchar(10),
+	C_District varchar(15),
+	C_pin_code int,
+	C_state varchar(15),
+	Bank_id varchar references Bank(Bank_id)
+
+);
+				
+CREATE TABLE Branch(
+	Branch_id int primary key NOT NULL,
+	Branch_name varchar(50),
+	Br_district varchar(15),
+	Bank_id varchar references Bank(Bank_id),
+   	Br_pin_code int,
+	Br_state varchar(15)
+);
+
+CREATE TABLE Account
+(
+	account_no Bigint primary key NOT NULL,
+	Aadhar_no Bigint  references Customer(Aadhar_no),
+	account_type char(10),
+	balance int,
+	Bank_id varchar references Bank(Bank_id),
+	Branch_id int references Branch(Branch_id)
+
+);
+CREATE TABLE ATM(
+	Atm_id varchar(10) primary key NOT NULL,
+	Bank_id varchar references Bank(Bank_id),
+	A_district varchar(15),
+	A_state varchar(15),
+	A_pin_code int,
+    	cash_balance bigint,
+	Branch_id int references Branch(Branch_id)
+);
+CREATE TABLE ATM_card
+(
+	Card_no Bigint primary key NOT NULL,
+	CVV int,
+	Card_fname varchar(20),
+	Card_mname varchar(20),
+	Card_lname varchar(20),
+	from_date date,
+	expiry_date date,
+	card_type varchar(15),
+	Pin_no int,
+	Aadhar_no Bigint  references Customer(Aadhar_no),
+	Bank_id varchar(50) references Bank(Bank_id),
+	account_no Bigint references Account(account_no),
+	transaction_limit Bigint
+);
+CREATE TABLE Phone_no(
+ 	phone_no Bigint ,
+	Aadhar_no Bigint  references Customer(Aadhar_no),
+	primary key(phone_no,Aadhar_no)
+
+);
+CREATE TABLE email(
+ 	email varchar(80),
+	Aadhar_no Bigint  references Customer(Aadhar_no),
+	primary key(email,Aadhar_no)
+
+);
+
+CREATE TABLE Transaction_H(
+	transaction_id Bigint primary key NOT NULL,
+	account_no Bigint references Account(account_no),
+	transaction_type varchar(15),
+	Aadhar_no Bigint  references Customer(Aadhar_no)
+
+);
+CREATE TABLE Transaction_details(
+	transaction_id Bigint primary key NOT NULL,
+	Aadhar_no Bigint  references Customer(Aadhar_no),
+	card_no Bigint references ATM_card(card_no),
+	date_1 date,
+	amount int,
+    	balance_left int,
+	location_l varchar(20),
+	time_t time,
+	Atm_id varchar(10) references ATM(Atm_id),
+	Bank_id varchar references Bank(Bank_id)
+);
+
+
+CREATE TABLE Operates(
+	Atm_id varchar references ATM(atm_id),
+	Aadhar_no Bigint  references Customer(Aadhar_no),
+	primary key(Atm_id,Aadhar_no)
+);
+
+CREATE TABLE other_bank_details
+(
+	O_bank_Id varchar(10) primary key NOT NULL, 
+	O_bank_account_no Bigint,
+	tax_count int,
+	Bank_id varchar references Bank(Bank_id)
+);
+
+
+CREATE TABLE transaction_details_other_bank
+(
+	transaction_id Bigint primary key NOT NULL,
+	Aadhar_no Bigint,
+	card_no Bigint,
+	date_1 date,
+	amount int,
+	location_l varchar(20),
+	time_t time,
+	Atm_id varchar(10) references ATM(Atm_id),
+	Bank_id varchar references Bank(Bank_id),
+	other_bank_id varchar(50) references other_bank_details(O_bank_Id)
+);
+
+INSERT INTO Bank VALUES ('SBI','SBIN0');
+
+INSERT INTO Customer VALUES ('1997-12-30',111111111111,'Mehak','P','Piplani','Faridabad',121001,'Haryana','SBIN0');
+INSERT INTO Customer VALUES ('1997-11-13',222222222222,'Megana','G','Varma','Visakhapatnam',530013,'AndhraPradesh','SBIN0');
+INSERT INTO Customer VALUES ('1998-08-06',333333333333,'Bhavana','K','Kurra','Kukatpally',500072,'Telangana','SBIN0');
+INSERT INTO Customer VALUES ('1998-07-01',444444444444,'Prasanna','T','Kalla','Vizianagaram',530025,'AndhraPradesh','SBIN0');
+INSERT INTO Customer VALUES ('1978-08-06',555555555555,'Bhanu','K','Prakash','Chennai',600029,'Tamilnadu','SBIN0');
+INSERT INTO Customer VALUES ('1964-04-09',666666666666,'Hymavathi','P','Muppalla','Mumbai',400090,'Maharashtra','SBIN0');
+INSERT INTO Customer VALUES ('1986-11-25',777777777777,'Suma','A','Kanakala','Kolkata',700014,'West Bengal','SBIN0');
+INSERT INTO Customer VALUES ('1990-01-01',888888888888,'Vandana','K','nalluri','Guntur',522101,'AndhraPradesh','SBIN0');
+
+
+INSERT INTO Branch VALUES (014976,'Pethapur','Gandhinagar','SBIN0',382610,'Gujarat');
+INSERT INTO Branch VALUES (019050,'SbiinTouch Infocity Branch','Gandhinagar','SBIN0',382009,'Gujarat');
+INSERT INTO Branch VALUES (060228,'Sector 11 Branch','Gandhinagar','SBIN0',382017,'Gujarat');
+INSERT INTO Branch VALUES (016685,'Sector 21 Branch','Gandhinagar','SBIN0',382021,'Gujarat');
+INSERT INTO Branch VALUES (002678,'Randheja','Gandhinagar','SBIN0',382620,'Gujarat');
+INSERT INTO Branch VALUES (016245,'Sampla','Rhotak','SBIN0',124501,'Haryana');
+INSERT INTO Branch VALUES (000693,'Palwal','Faridabad','SBIN0',121102,'Haryana');
+INSERT INTO Branch VALUES (005153,'Ameerpet','Hyderabad','SBIN0',500038,'AndhraPradesh');
+INSERT INTO Branch VALUES (000952,'Vizag','Visakhapatnam','SBIN0',500003,'AndhraPradesh');
+INSERT INTO Branch VALUES (014384,'Vepada','Vizianagaram','SBIN0',535281,'AndhraPradesh');
+INSERT INTO Branch VALUES (011752,'Chandivali','Mumbai','SBIN0',400072,'Maharashtra');
+INSERT INTO Branch VALUES (006794,'AE Market','Kolkata','SBIN0',700064,'West Bengal');
+
+
+INSERT INTO Account VALUES (56345123456,111111111111,'Current',25000,'SBIN0',000693);
+INSERT INTO Account VALUES (56345123123,222222222222,'Savings',5000,'SBIN0',000952);
+INSERT INTO Account VALUES (56345456457,333333333333,'Savings',12000,'SBIN0',005153);
+INSERT INTO Account VALUES (56345456128,444444444444,'Current',10000,'SBIN0',014384);
+
+INSERT INTO Account VALUES (56345123458,555555555555,'Current',250,'SBIN0',011752);
+INSERT INTO Account VALUES (56345123120,666666666666,'Savings',5700,'SBIN0',011752);
+INSERT INTO Account VALUES (56345456459,777777777777,'Current',120000,'SBIN0',006794);
+INSERT INTO Account VALUES (56345456122,888888888888,'Savings',1050,'SBIN0',005153);
+
+
+INSERT INTO ATM_card VALUES (9988887777661234,121,'Mehak','P','Piplani','2016-09-01','2022-05-15','VISA',1092,111111111111,'SBIN0',56345123456,10000);
+INSERT INTO ATM_card VALUES (9988887777661243,234,'Megana','G','Varma','2015-03-02','2020-06-28','VISA',5642,222222222222,'SBIN0',56345123123,10000);
+INSERT INTO ATM_card VALUES (9988887777663412,311,'Bhavana','K','Kurra','2016-11-11','2025-10-02','MATERCARD',6754,333333333333,'SBIN0',56345456457,50000);
+INSERT INTO ATM_card VALUES (9988887777663421,645,'Prasanna','T','Kalla','2015-01-22','2019-02-17','MASTERCARD',9087,444444444444,'SBIN0',56345456128,50000);
+INSERT INTO ATM_card VALUES (9988887777665678,222,'Bhanu','K','Prakash','2016-04-01','2032-11-20','VISA',9452,555555555555,'SBIN0',56345123458,10000);
+INSERT INTO ATM_card VALUES (9988887777661011,682,'Hymavathi','P','Muppalla','2014-12-27','2028-09-06','VISA',8120,666666666666,'SBIN0',56345123120,10000);
+INSERT INTO ATM_card VALUES (9988887777663891,268,'Suma','A','Kanakala','2013-10-13','2022-12-10','MASTERCARD',3109,777777777777,'SBIN0',56345456459,50000);
+INSERT INTO ATM_card VALUES (9988887777662468,246,'vandana','K','nalluri','2016-02-02','2027-12-24','VISA',1024,888888888888,'SBIN0',56345456122,10000);
+
+INSERT INTO Phone_no VALUES (7096093200,111111111111);
+INSERT INTO Phone_no VALUES (8985093960,222222222222);
+INSERT INTO Phone_no VALUES (9737362408,333333333333);
+INSERT INTO Phone_no VALUES (7284962525,444444444444);
+INSERT INTO Phone_no VALUES (9666879394,555555555555);
+INSERT INTO Phone_no VALUES (9515346028,666666666666);
+INSERT INTO Phone_no VALUES (9737362408,777777777777);
+INSERT INTO Phone_no VALUES (9866628103,888888888888);
+
+
+INSERT INTO email VALUES ('201551072@iiitvadodara.ac.in',111111111111);
+INSERT INTO email VALUES ('201551089@iiitvadodara.ac.in',222222222222);
+INSERT INTO email VALUES ('201551071@iiitvadodara.ac.in',333333333333);
+INSERT INTO email VALUES ('201551049@iiitvadodara.ac.in',444444444444);
+INSERT INTO email VALUES ('Bhanu.prakash@gmail.com',555555555555);
+INSERT INTO email VALUES ('hyma24682@gmail.com',666666666666);
+INSERT INTO email VALUES ('Suma.kanakala@gmail.com',777777777777);
+INSERT INTO email VALUES ('vandana98@gmail.com',888888888888);
+
+
+INSERT INTO Transaction_H VALUES(4567,56345123456,'cash withdrawl',111111111111);
+INSERT INTO Transaction_H VALUES(3682,56345123456,'mini statement',111111111111);
+INSERT INTO Transaction_H VALUES(6932,56345123123,'cash withdrawl',222222222222);
+INSERT INTO Transaction_H VALUES(0672,56345123123,'mini statement',222222222222);
+INSERT INTO Transaction_H VALUES(1134,56345456457,'cash withdrawl',333333333333);
+INSERT INTO Transaction_H VALUES(2455,56345456457,'mini statement',333333333333);
+INSERT INTO Transaction_H VALUES(9831,56345456128,'cash withdrawl',444444444444);
+INSERT INTO Transaction_H VALUES(5467,56345456128,'mini statement',444444444444);
+INSERT INTO Transaction_H VALUES(6655,56345123458,'cash withdrawl',555555555555);
+INSERT INTO Transaction_H VALUES(1447,56345123458,'mini statement',555555555555);
+INSERT INTO Transaction_H VALUES(8754,56345123120,'cash withdrawl',666666666666);
+INSERT INTO Transaction_H VALUES(8998,56345123120,'mini statement',666666666666);
+INSERT INTO Transaction_H VALUES(1596,56345456459,'cash withdrawl',777777777777);
+INSERT INTO Transaction_H VALUES(2312,56345456459,'mini statement',777777777777);
+INSERT INTO Transaction_H VALUES(3654,56345456122,'cash withdrawl',888888888888);
+INSERT INTO Transaction_H VALUES(5826,56345456122,'mini statement',888888888888);
+
+
+INSERT INTO ATM VALUES ('SBI0123','SBIN0','Faridabad','Haryana',121001 ,500000,000693 );
+INSERT INTO ATM VALUES ('SBI0567','SBIN0','Visakhapatnam','AndhraPradesh',530026 ,500000,000952 );
+INSERT INTO ATM VALUES ('SBI0879','SBIN0','Guntur','AndhraPradesh',522101 ,250000,005153 );
+INSERT INTO ATM VALUES ('SBI0111','SBIN0','Rohtak','Haryana',522112 ,30000,016245 );
+INSERT INTO ATM VALUES ('SBI0155','SBIN0','Panipat','Haryana',121892 ,15000,000693 );
+INSERT INTO ATM VALUES ('SBI0655','SBIN0','Gandhinagar','Gujarat',382028 ,30000,019050 );
+
+
+
+INSERT INTO Transaction_details VALUES (4567,111111111111,9988887777661234,'2017-03-25',1000,24000,'Faridabad','12:52:08','SBI0123','SBIN0');
+INSERT INTO Transaction_details VALUES (6932,222222222222,9988887777661243,'2017-03-15',500,4500,'Visakhapatnam','08:06:46','SBI0567','SBIN0');
+INSERT INTO Transaction_details VALUES (1134,333333333333,9988887777663412,'2017-03-27',2000,10000,'Guntur','05:45:06','SBI0879','SBIN0');
+INSERT INTO Transaction_details VALUES (9831,444444444444,9988887777663421,'2017-03-10',5000,5000,'Gandhinagar','06:35:08','SBI0655','SBIN0');
+INSERT INTO Transaction_details VALUES (6655,555555555555,9988887777665678,'2017-02-25',200,50,'Panipat','06:35:08','SBI0155','SBIN0');
+INSERT INTO Transaction_details VALUES (8754,666666666666,9988887777661011,'2017-02-15',2000,3700,'Rhotak','06:35:08','SBI0111','SBIN0');
+INSERT INTO Transaction_details VALUES (1596,777777777777,9988887777663891,'2017-02-27',50000,70000,'Gandhinagar','06:35:08','SBI0655','SBIN0');
+INSERT INTO Transaction_details VALUES (3654,888888888888,9988887777662468,'2017-02-10',500,550,'Visakhapatnam','06:35:08','SBI0567','SBIN0');
+INSERT INTO Transaction_details VALUES (3682,111111111111,9988887777661234,'2017-04-08',0,24000,'Panipat','16:35:08','SBI0155','SBIN0');
+INSERT INTO Transaction_details VALUES (0672,222222222222,9988887777661243,'2017-02-23',0,4500,'Rhotak','18:37:19','SBI0111','SBIN0');
+INSERT INTO Transaction_details VALUES (2455,333333333333,9988887777663412,'2017-01-20',0,10000,'Faridabad','06:15:50','SBI0123','SBIN0');
+INSERT INTO Transaction_details VALUES (5467,444444444444,9988887777663421,'2017-01-15',0,5000,'Gandhinagar','12:22:45','SBI0655','SBIN0');
+INSERT INTO Transaction_details VALUES (1447,555555555555,9988887777665678,'2017-03-27',0,50,'Faridabad','12:22:45','SBI0123','SBIN0');
+INSERT INTO Transaction_details VALUES (8998,666666666666,9988887777661011,'2017-02-11',0,700,'Guntur','12:22:45','SBI0879','SBIN0');
+INSERT INTO Transaction_details VALUES (2312,777777777777,9988887777663891,'2017-01-08',0,70000,'Panipat','12:22:45','SBI0155','SBIN0');
+INSERT INTO Transaction_details VALUES (5826,888888888888,9988887777662468,'2017-03-22',0,550,'Gandhinagar','12:22:45','SBI0655','SBIN0');
+
+
+
+
+
+INSERT INTO Operates VALUES ('SBI0123',111111111111);
+INSERT INTO Operates VALUES ('SBI0567',222222222222);
+INSERT INTO Operates VALUES ('SBI0879',333333333333);
+INSERT INTO Operates VALUES ('SBI0111',444444444444);
+
+INSERT INTO other_bank_details VALUES('BARB0',33558899642117 ,7 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('HDFC0',5566894217358 ,8 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('PUNB0',59487623587426 ,9 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('BKID0',874561234578945 ,6 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('AMCB0',15926348753 ,8 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('ADCB0',7845123695 ,7 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('CNRB0',44889651576 ,9 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('MAHB0',65451781238 ,8 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('ICIC0',23564797597 ,7 ,'SBIN0' );
+INSERT INTO other_bank_details VALUES('UBIN0',874569321548965 ,9 ,'SBIN0' );
+
+INSERT INTO Transaction_details_other_bank VALUES (7618,111111111111,888888888888821,'2017-05-29',900,'Faridabad','12:52:08','SBI0123','SBIN0','HDFC0');
+INSERT INTO Transaction_details_other_bank VALUES (7698,111111111111,888888888888821,'2017-05-28',600,'Faridabad','12:52:08','SBI0123','SBIN0','HDFC0');
+INSERT INTO Transaction_details_other_bank VALUES(2618,222222222222,777777777777721,'2017-06-29',2000,'Visakhapatnam','12:52:08','SBI0567','SBIN0','CNRB0');
+INSERT INTO Transaction_details_other_bank VALUES (2818,222222222222,777777777777721,'2017-10-29',800,'Visakhapatnam','09:49:08','SBI0567','SBIN0','CNRB0');
+INSERT INTO Transaction_details_other_bank VALUES (2761,222222222222,777777777777721,'2017-10-18',800,'Visakhapatnam','09:49:08','SBI0567','SBIN0','CNRB0');
+INSERT INTO Transaction_details_other_bank VALUES (2985,333333333333,666666666666621,'2017-09-20',1000,'Faridabad','09:15:50','SBI0123','SBIN0','ICIC0');
+INSERT INTO Transaction_details_other_bank VALUES (2095,333333333333,666666666666621,'2017-09-10',1000,'Guntur','09:15:50','SBI0879','SBIN0','ICIC0');
+INSERT INTO Transaction_details_other_bank VALUES (5447,444444444444,888888888888829,'2017-08-25',5000,'Gandhinagar','12:22:45','SBI0655','SBIN0','HDFC0');
+INSERT INTO Transaction_details_other_bank VALUES (5237,444444444444,444444444444429,'2017-09-29',7000,'Gandhinagar','02:22:45','SBI0655','SBIN0','PUNB0');
+INSERT INTO Transaction_details_other_bank VALUES (5547,444444444444,444444444444429,'2017-09-08',5000,'Gandhinagar','07:22:45','SBI0655','SBIN0','PUNB0');
+INSERT INTO Transaction_details_other_bank VALUES (5607,101010101010,333333333333330,'2017-11-05',7000,'Panipat','07:22:45','SBI0155','SBIN0','BKID0');
+INSERT INTO Transaction_details_other_bank VALUES (3417,202020202020,333333333333387,'2017-11-06',700,'Panipat','09:22:45','SBI0155','SBIN0','BKID0');
+
+
+
+
+

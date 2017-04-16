@@ -1,0 +1,350 @@
+1)
+SET SEARCH_PATH TO bank_accounting_to_atm;
+create or replace function card_exp_check(cd_no in Bigint,present_date in date)
+ returns int as $$
+declare
+exp_date date;
+begin
+select expiry_date into exp_date from ATM_card where (card_no=cd_no);
+if extract(year from present_date)<extract(year from exp_date) then 
+return 1;
+elsif extract(year from (present_date))=extract(year from (exp_date)) then
+    if extract(month from present_date)<extract(month from exp_date) then
+    return 1;
+     else
+        if (extract(month from present_date) = extract(month from exp_date)) then 
+           if (extract(day from present_date)<=extract(day from exp_date)) then 
+	       return 1;
+           else
+           return 0;
+           end if;
+        else
+        return 0;
+        end if;
+    end if;                                                                                            
+else 
+return 0;                                                  
+end if;
+end
+$$ language plpgsql;
+
+
+2)SET SEARCH_PATH TO bank_accounting_to_atm;
+create or replace function card_existence(c in Bigint,result out int) as $$
+declare
+f int;
+begin
+select count(card_no) into f from ATM_card where (card_no=c);
+if f=1 then
+result=1;
+else
+result=0;
+end if;
+end
+$$ language plpgsql;
+
+
+3)SET SEARCH_PATH TO bank_accounting_to_atm;
+create or replace function aadhar_check(aa_no Bigint) 
+returns Bigint as $$
+declare
+f Bigint;
+m Bigint;
+Begin
+select account_no into m from ATM_card where Aadhar_no=aa_no;
+if m!=0 then
+return m;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+
+4)SET SEARCH_PATH TO bank_accounting_to_atm;
+create or replace function trans_limit_per_card
+ (c in bigint,present_date in date,new_amount in int,result out int)  as $$
+declare
+f int;
+s int;
+ss int;
+amt int;
+begin
+select transaction_limit into amt from ATM_card where (card_no=c);
+select count(date_1) into f from transaction_details
+where
+(card_no=c and date_1<present_date);
+if f=0 then
+ if new_amount <= amt then
+ result=1;
+ else
+ result=0;
+ end if;
+else 
+select sum(amount) into s from transaction_details 
+where
+(card_no=c and date_1 < present_date) group by c,date_1;
+ss = s + new_amount;
+if ss <=amt then
+result=1;
+else
+  result=0;
+  end if;
+ end if;
+end
+$$language plpgsql;
+
+
+
+5)SET SEARCH_PATH TO bank_accounting_to_atm;
+create or replace function tax_check(c in Bigint,m in int,y in int) returns int as $$ 
+declare
+trans_count int;
+begin
+select count(transaction_id) into trans_count from Transaction_details
+where 
+(card_no=c and extract(year from date_1)=y 
+and extract(month from date_1)=m) group by card_no;
+   
+if trans_count<=3 then
+return 1;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+6)set search_path to bank_accounting_to_atm;
+create or replace function pin_check(c_no in Bigint,p in int) 
+returns int as $$
+declare
+correct_pin int;
+begin
+select pin_no into correct_pin from ATM_card where (Card_no = c_no);
+if correct_pin = p then
+return 1;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+7)set search_path to bank_accounting_to_atm;
+create or replace function trans_amount_check(aa_no in Bigint,trans_amount in Bigint) 
+returns int as $$
+declare
+f Bigint;
+begin
+select balance into f from account where (account_no=aa_no);
+if (trans_amount < f)  then
+return 1;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+8)set search_path to bank_accounting_to_atm;
+create or replace function cardno_to_account_no(c_no in Bigint) 
+returns Bigint as $$
+declare
+m Bigint;
+begin
+select account_no into m from ATM_card where (card_no = c_no);
+if m!=0 then
+return m;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+9)set search_path to bank_accounting_to_atm;
+create or replace function cardno_to_aadhar_no(c_no in Bigint) 
+returns Bigint as $$
+declare
+m Bigint;
+begin
+select Aadhar_no into m from ATM_card where (card_no = c_no);
+if m!=0 then
+return m;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+10)
+set search_path to bank_accounting_to_atm;
+create or replace function ATM_existance(a_id in Varchar) 
+returns int as $$
+declare
+f int;
+begin
+select count(ATM_id) into f from ATM where (ATM_id = a_id);
+if f = 1 then
+return 1;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+11)set search_path to bank_accounting_to_atm;
+create or replace function other_bankid_check(ban_id in Varchar) 
+returns int as $$
+declare
+f int;
+begin
+select count(O_bank_Id) into f from other_bank_details where (O_bank_Id = ban_id);
+if f = 1 then
+return 1;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+12)set search_path to bank_accounting_to_atm;
+create or replace function branch_check(bid in int)
+returns int as $$ 
+declare 
+    flag int;
+begin
+select count(Branch_id) into flag from Branch where(Branch_id=bid);
+if flag=1 then
+return 1;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+13)set search_path to bank_accounting_to_atm;
+create or replace function fname_check(f_na in Varchar)
+returns int as $$ 
+declare 
+    f int;
+begin
+select count(*) into f from Customer where(fname=f_na);
+if f=1 then
+return 1;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+14)set search_path to bank_accounting_to_atm;
+create or replace function ATM_balance_update(trans_amount in int,A_ID in varchar) 
+returns int as $$
+declare
+  prev_amount int;
+  update_amount int;
+begin
+   select cash_balance into prev_amount from ATM where(Atm_id = A_ID);
+  if (prev_amount!=0) then
+     if (trans_amount<prev_amount) then
+     update_amount = prev_amount - trans_amount;
+     update ATM set cash_balance=update_amount where (Atm_id = A_ID);
+     else
+     return 2;
+     end if;
+     return 1;
+  else
+   return 0;
+  end if;
+end
+$$ language plpgsql;
+
+
+15)
+set search_path to bank_accounting_to_atm;
+create or replace function update_balance_and_trans_check(trans_amount in int,acnt_no in bigint) 
+returns int as $$
+declare
+  prev_amount int;
+  update_amount int;
+    
+begin
+select balance into prev_amount from Account where(account_no=acnt_no);
+if (prev_amount > trans_amount) then
+   update_amount = prev_amount - trans_amount;
+   update account set balance=update_amount where (account_no=acnt_no);
+   return update_amount;  
+   else 
+   return prev_amount;
+ end if;
+end
+$$ language plpgsql;
+
+
+
+16)
+set search_path to bank_accounting_to_atm;
+create or replace function aadhaar_cust_and_has_atmcard_check(aa_no in Bigint)
+returns int as $$
+declare
+n Bigint;
+m Bigint;
+Begin
+select Aadhar_no into n from Customer where (Aadhar_no=aa_no);
+if n!=0 then
+      select Aadhar_no into m from ATM_card where (Aadhar_no=aa_no);
+      if m!=0 then
+      return 1;
+      else 
+      return 2;
+      end if;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+17)
+
+SET SEARCH_PATH TO bank_accounting_to_atm;
+create or replace function aadhar_check_in_cust(aa_no Bigint) 
+returns Bigint as $$
+declare
+f Bigint;
+m Bigint;
+Begin
+select account_no into m from Customer natural join Account where Aadhar_no=aa_no;
+if m!=0 then
+return m;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+18)SET SEARCH_PATH TO bank_accounting_to_atm;
+create or replace function aadhar_exist_check(aa_no Bigint) 
+returns Bigint as $$
+declare
+f Bigint;
+m Bigint;
+Begin
+select Aadhar_no into m from Customer where Aadhar_no=aa_no;
+if m!=0 then
+return 1;
+else
+return 0;
+end if;
+end
+$$ language plpgsql;
+
+
+
+
+

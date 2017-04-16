@@ -1,0 +1,141 @@
+1)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+Select Customer.DOB,Customer.Aadhar_no,Customer.fname,Customer.mname
+,Customer.C_District, Customer.C_pin_code,Customer.C_state,Customer.Bank_id
+from Customer JOIN Transaction_details 
+on Customer.Aadhar_no=Transaction_details.Aadhar_no
+where extract( day from date_1)=15 AND Atm_id='SBI0567';
+
+2)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+Select avg(amount) from Transaction_details where 
+extract(month from date_1)=3;
+
+
+3)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+Select* from Customer JOIN 
+(Select Transaction_details.Aadhar_no from account JOIN Transaction_details on account.account_type='Current' AND
+Transaction_details.Atm_id='SBI0123') as R
+on Customer.Aadhar_no=R.Aadhar_no; 
+
+4)SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select * from Customer inner join transaction_details
+on (customer.Aadhar_no=transaction_details.Aadhar_no)
+inner join Transaction_H on (customer.Aadhar_no=transaction_H.Aadhar_no)
+where Transaction_H.transaction_type='mini statement'
+ AND transaction_details.Atm_id='SBI0123'
+AND transaction_details.date_1='25-Mar-2017';
+
+
+5)SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select Transaction_details.transaction_id from Transaction_details 
+LEFT JOIN Transaction_H on
+(Transaction_details.transaction_id=Transaction_H.transaction_id)
+where Transaction_H.transaction_type='mini statement';
+
+6)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select Customer.fname,Customer.Aadhar_no,r.transaction_id,r.card_no,r.balance_left,
+r.Bank_id from Customer JOIN
+(select * from Transaction_details where Atm_id='SBI0655' AND
+(extract(month from date_1)=1 OR extract(month from date_1)=2))
+as r on (Customer.Aadhar_no=r.Aadhar_no);
+
+7)
+select r.fname,r.Branch_id,r.Branch_name,r.Bank_id,Atm_id
+from Atm JOIN 
+(select Customer.fname,Customer.C_District, Branch.Branch_id,Branch_name,
+Customer.Bank_id from Customer  join Branch on (Customer.C_District=Branch.bank_id)
+where Customer.C_District=Branch.Br_District) as r
+on (Atm.Bank_id=r.Bank_id)
+where Atm.A_district=r.C_District;
+
+8)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select count(Atm_id) from Transaction_details group by ATM_id;
+
+9)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select Atm_id,Count(Atm_id) as Count from Transaction_details group by ATM_id;
+
+10)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select Customer.fname,Customer.C_district,Transaction_details.amount,
+Transaction_details.date_1
+from Customer JOIN Transaction_details on
+(Customer.Aadhar_no=Transaction_details.Aadhar_no)
+where Transaction_details.amount>1000 AND EXTRACT(month from date_1)=3;
+
+
+11)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select Account.account_type,Atm_card.Card_lname,Atm_card.card_type from
+Account JOIN Atm_card on (Account.Aadhar_no=Atm_card.Aadhar_no)
+where Account.account_type='Savings'
+AND Atm_card.card_type='VISA';
+
+
+12)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select Customer.fname,Customer.lname,Customer.mname from
+Customer JOIN ATM_card
+on (Customer.Aadhar_no=ATM_card.Aadhar_no)
+where Customer.fname=ATM_card.card_fname AND
+Customer.lname=ATM_card.Card_lname AND
+Customer.mname=ATM_card.Card_mname;
+
+
+13)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select tob.Aadhar_no,tob.Bank_id,tob.other_bank_id
+from Transaction_details_other_bank as tob JOIN 
+Customer as c on c.Aadhar_no=tob.Aadhar_no;
+
+
+14)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select sum(amount),other_bank_id from transaction_details_other_bank
+where extract(month from date_1)=9 group by other_bank_id;
+
+15)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select card_no,from_date,expiry_date from atm_card
+where extract(year from expiry_date) >2020;
+
+16)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select r.Aadhar_no,r.Card_fname,r.from_date,Transaction_details.Atm_id
+from Transaction_details JOIN
+(select Aadhar_no, Card_fname,from_date from Atm_card
+where extract(year from from_date)=2015) as r
+on Transaction_details.Aadhar_no=r.Aadhar_no
+where Transaction_details.Atm_id='SBI0111'
+
+
+17)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select * from Branch JOIN ATM
+on Branch.Bank_id=ATM.Bank_id
+where Branch.Br_district='Gandhinagar' AND
+ATM.Atm_id='SBI0655';
+
+18)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select Bank_id,o_bank_Id,tax_count from 
+other_bank_details;
+
+19)
+SET SEARCH_PATH TO BANK_ACCOUNTING_to_atm;
+select ATM_card.card_fname, ATM_card.Aadhar_no,
+Transaction_details.date_1 from
+Transaction_details JOIN ATM_card
+on Transaction_details.Aadhar_no=ATM_card.Aadhar_no
+where extract(year from Transaction_details.date_1)=2017
+AND ATM_card.card_type='VISA';
+
+
+
+
+
+
